@@ -1,0 +1,1 @@
+mysql -u moneyuser -p moneywars < /path/to/create_tables.sql
