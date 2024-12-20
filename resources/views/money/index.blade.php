@@ -41,7 +41,7 @@
     <!-- ここに本文を記述します -->
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script src="{{ asset('js/jquery.minicalendar.js') }}"></script>
-    
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
@@ -67,12 +67,21 @@
 
         // 前月ボタンイベント
         $('#prevMonth').click(function() {
+            // 現在の年月から前月の日付を計算
             const currentDate = new Date(calendarInstance.year, calendarInstance.month - 1, 1);
             const prevMonthDate = new Date(currentDate.setMonth(currentDate.getMonth() - 1));
+
+            // 前月の日付を YYYY-MM-01 形式にフォーマット
             const formattedDate = `${prevMonthDate.getFullYear()}-${(prevMonthDate.getMonth() + 1).toString().padStart(2, '0')}-01`;
+
+            // 表示用の年月文字列を作成 (YYYY年MM月)
             const dispDate = `${prevMonthDate.getFullYear()}年${(prevMonthDate.getMonth() + 1).toString().padStart(2, '0')}月`;
+
+            // カレンダーのヘッダーに年月を表示
             $('.calendar-year-month').text(dispDate);
-            calendarInstance.loadData(formattedDate); // 前月データを取得
+
+            // Ajax で前月のデータを取得してカレンダーを更新
+            calendarInstance.loadData(formattedDate);
         });
 
 

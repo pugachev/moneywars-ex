@@ -49,9 +49,9 @@
         } else if (i === this.opts.weekType.length-1) {
           outText += '<th class="calendar-sat">';
         } else {
-          outText += '<th>';  
+          outText += '<th>';
         }
-        
+
         outText += this.opts.weekType[i] +'</th>';
       }
       outText += '</thead><tbody></tbody></table>';
@@ -66,7 +66,7 @@
       $(this.ele).find('.calendar-year-month').text(tgtyearmonth);
       var thisDate = new Date(thisYear, thisMonth-1, 1);
       console.log($('.calendar-year-month').text());
-      
+
       // 開始の曜日
       var startWeek = thisDate.getDay();
 
@@ -151,40 +151,43 @@
     loadData : function(targetDate = null) {
         var self = this;
         let csrfToken = $('meta[name="csrf-token"]').attr('content');
-    
+
         const defaultTgtDate = targetDate || `${new Date().getFullYear()}-${(new Date().getMonth() + 1).toString().padStart(2, '0')}-01`;
-    
+
         $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': csrfToken
             }
         });
-    
+
         let url = window.routes.moneyJson;
         if (defaultTgtDate) {
             url += `?tgtdate=${defaultTgtDate}`;
         }
-    
+
         $.ajax({
             type: "GET",
             url: url,
             dataType: "json",
             async: true,
             success: function(data) {
-                console.log(data);
-                self.events = data.event;
-                self.year = data.year;
-                self.month = data.month;
-                self.date = new Date(data.year, data.month - 1, 1);
-                self.holiday = data.holiday;
+                // MoneyControllerから取得したデータを設定
+                self.events = data.event; // 支出データ
+                self.year = data.year; // 年
+                self.month = data.month; // 月
+                self.date = new Date(data.year, data.month - 1, 1); // 日付オブジェクト
+                self.holiday = data.holiday; // 休日データ
+
+                // カレンダーを再描画
                 self.printType(self.year, self.month);
                 self.setEvent();
             },
             error: function(jqXHR, textStatus, errorThrown) {
-                console.error("データ取得エラー:", textStatus);
+                console.error("MoneyControllerからのデータ取得に失敗:", textStatus);
+                console.error("エラー詳細:", errorThrown);
             }
         });
-    }  
+    }
   };
 
   $.wop.miniCalendar.defaults = {
