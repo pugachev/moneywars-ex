@@ -78,9 +78,6 @@
             // 前月の日付を YYYY-MM-DD 形式にフォーマット
             const formattedDate = `${prevMonthDate.getFullYear()}-${String(prevMonthDate.getMonth() + 1).padStart(2, '0')}-01`;
 
-            // 表示用の年月文字列を作成 (YYYY年MM月)
-            const dispDate = `${prevMonthDate.getFullYear()}年${String(prevMonthDate.getMonth() + 1).padStart(2, '0')}月`;
-
             // デバッグ用ログ
             console.log('Moving to date:', formattedDate);
 
