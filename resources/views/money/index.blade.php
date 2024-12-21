@@ -62,8 +62,12 @@
         window.routes = {
             moneyJson: "{{ route('money.json') }}"
         };
-        // インスタンス生成
-        var calendarInstance =  $('#miniCalendar').miniCalendar({ api: true });
+        
+        // インスタンス生成の修正
+        var calendarInstance = $('#mini-calendar').miniCalendar({
+            api: true,
+            jsonUrl: window.routes.moneyJson  // APIのURLを設定
+        });
 
         // 前月ボタンイベント
         $('#prevMonth').click(function() {
@@ -71,30 +75,31 @@
             const currentDate = new Date(calendarInstance.year, calendarInstance.month - 1, 1);
             const prevMonthDate = new Date(currentDate.setMonth(currentDate.getMonth() - 1));
 
-            // 前月の日付を YYYY-MM-01 形式にフォーマット
-            const formattedDate = `${prevMonthDate.getFullYear()}-${(prevMonthDate.getMonth() + 1).toString().padStart(2, '0')}-01`;
+            // 前月の日付を YYYY-MM-DD 形式にフォーマット
+            const formattedDate = `${prevMonthDate.getFullYear()}-${String(prevMonthDate.getMonth() + 1).padStart(2, '0')}-01`;
 
             // 表示用の年月文字列を作成 (YYYY年MM月)
-            const dispDate = `${prevMonthDate.getFullYear()}年${(prevMonthDate.getMonth() + 1).toString().padStart(2, '0')}月`;
+            const dispDate = `${prevMonthDate.getFullYear()}年${String(prevMonthDate.getMonth() + 1).padStart(2, '0')}月`;
 
-            // カレンダーのヘッダーに年月を表示
-            $('.calendar-year-month').text(dispDate);
+            // デバッグ用ログ
+            console.log('Moving to date:', formattedDate);
 
-            // Ajax で前月のデータを取得してカレンダーを更新
+            // カレンダーの更新を呼び出し
+            calendarInstance.loadData(formattedDate); 
+        });
+
+        // 翌月ボタンイベント（修正版）
+        $('#nextMonthLink').click(function() {
+            const currentDate = new Date(calendarInstance.year, calendarInstance.month - 1, 1);
+            const nextMonthDate = new Date(currentDate.setMonth(currentDate.getMonth() + 1));
+            
+            const formattedDate = `${nextMonthDate.getFullYear()}-${String(nextMonthDate.getMonth() + 1).padStart(2, '0')}-01`;
+            
+            console.log('Moving to date:', formattedDate);
+            
             calendarInstance.loadData(formattedDate);
         });
-
-
-        $('#nextMonth').click(function() {
-            var currentMonth = new Date(self.year, self.month - 1, 1);
-            var nextMonth = new Date(currentMonth.setMonth(currentMonth.getMonth() + 1));
-            self.loadData(`${nextMonth.getFullYear()}-${(nextMonth.getMonth() + 1).toString().padStart(2, '0')}-01`);
-        });
-
-        $('#mini-calendar').miniCalendar();
-
       });
     </script>
-    <stylesheet
   </body>
 </html>
