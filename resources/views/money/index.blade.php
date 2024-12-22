@@ -59,10 +59,50 @@
     <script type="text/javascript">
 
       $(function(){
+        // アラートメッセージを3秒後に消す
+        if ($('#alert').length > 0) {
+            setTimeout(function() {
+                $('#alert').fadeOut('slow');
+            }, 3000);
+        }
+
+        // datepickerの設定を修正
+        $('.datepicker').datepicker({
+            format: 'yyyy-mm-dd',
+            language: 'ja',
+            autoclose: true,
+            todayHighlight: true,
+            clearBtn: true,  // クリアボタンを表示
+            autocomplete: 'off'  // オートコンプリートを無効化
+        });
+
+        // モーダルが閉じられた時にフォームをリセット
+        $('#dataCreate').on('hidden.bs.modal', function () {
+            $('#spendingForm')[0].reset();
+            $('.datepicker').datepicker('update', '');  // datepickerの値をクリア
+        });
+
+        // 金額入力欄にカンマ区切りを適用
+        $('#amount').on('input', function() {
+            // 数字以外の文字を削除
+            let value = $(this).val().replace(/[^\d]/g, '');
+            // カンマ区切りを適用
+            if (value) {
+                value = Number(value).toLocaleString();
+            }
+            $(this).val(value);
+        });
+
+        // フォーム送信時に金額からカンマを削除
+        $('#spendingForm').on('submit', function() {
+            let amount = $('#amount').val();
+            $('#amount').val(amount.replace(/,/g, ''));
+        });
+
         window.routes = {
             moneyJson: "{{ route('money.json') }}"
         };
-        
+
         // インスタンス生成の修正
         var calendarInstance = $('#mini-calendar').miniCalendar({
             api: true,
@@ -82,21 +122,57 @@
             console.log('Moving to date:', formattedDate);
 
             // カレンダーの更新を呼び出し
-            calendarInstance.loadData(formattedDate); 
+            calendarInstance.loadData(formattedDate);
         });
 
         // 翌月ボタンイベント（修正版）
         $('#nextMonthLink').click(function() {
             const currentDate = new Date(calendarInstance.year, calendarInstance.month - 1, 1);
             const nextMonthDate = new Date(currentDate.setMonth(currentDate.getMonth() + 1));
-            
+
             const formattedDate = `${nextMonthDate.getFullYear()}-${String(nextMonthDate.getMonth() + 1).padStart(2, '0')}-01`;
-            
+
             console.log('Moving to date:', formattedDate);
-            
+
             calendarInstance.loadData(formattedDate);
         });
       });
     </script>
   </body>
 </html>
+<!-- モーダルダイアログ - Bootstrap形式に修正 -->
+<div class="modal fade" id="dataCreate" tabindex="-1" role="dialog" aria-labelledby="dataCreateLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="dataCreateLabel">支出の登録</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="spendingForm" method="POST" action="{{ route('money.store') }}">
+                    @csrf
+                    <div class="form-container">
+                        <div class="form-group">
+                            <label for="date">日付</label>
+                            <input type="text" class="form-control datepicker" id="date" name="date" required autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label for="amount">金額</label>
+                            <input type="text" class="form-control" id="amount" name="amount" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="description">説明</label>
+                            <input type="text" class="form-control" id="description" name="description">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">閉じる</button>
+                        <button type="submit" class="btn btn-primary">保存</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

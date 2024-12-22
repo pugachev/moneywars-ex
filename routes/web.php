@@ -21,3 +21,4 @@ Route::get('/money', [MoneyController::class, 'index'])->name('money.index');
 Route::get('/money/json/{tgtdate?}', [MoneyController::class, 'getJsonData'])
     ->withoutMiddleware(['verifyCsrfToken'])
     ->name('money.json');
+Route::post('/money/store', [MoneyController::class, 'store'])->name('money.store');
