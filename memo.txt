@@ -1,0 +1,20 @@
+新しい環境で立ち上げる際の手順
+(1)branchをcloneしてくる
+git clone https://github.com/pugachev/moneywars-ex.git
+
+(2)composer update
+
+(3).envファイルを作成する
+cp .env.example .env
+
+(4)docker-composeを起動する
+docker-compose up -d
+
+(5)コンテナに入る
+docker exec app bash
+
+(6)migrateする
+php artisan migrate --seed
+
+(7)key generateする
+php artisan key:generate
