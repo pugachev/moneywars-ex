@@ -11,7 +11,7 @@ cp .env.example .env
 docker-compose up -d
 
 (5)コンテナに入る
-docker exec app bash
+docker exec -it moneywars_app bash
 
 (6)migrateする
 php artisan migrate --seed
