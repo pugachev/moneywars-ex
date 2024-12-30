@@ -209,16 +209,27 @@
                     $('#spendingListBody').empty();
                     $('#dailySpendingListLabel').text(date + ' の支出一覧');
 
+                    // 項目の表示名を定義
+                    const itemNames = {
+                        1: '食費',
+                        2: '日用品',
+                        3: '衣服',
+                        4: '交通費',
+                        5: 'その他'
+                    };
+
                     data.forEach(function(spending) {
                         const row = `
                             <tr>
                                 <td>${Number(spending.tgtmoney).toLocaleString()}円</td>
+                                <td>${itemNames[spending.tgtitem] || '不明'}</td>
                                 <td>${spending.description || '説明なし'}</td>
                                 <td>
                                     <button class="btn btn-sm btn-primary edit-spending mr-2"
                                             data-id="${spending.id}"
                                             data-money="${spending.tgtmoney}"
-                                            data-item="${spending.tgtitem}">
+                                            data-item="${spending.tgtitem}"
+                                            data-description="${spending.description || ''}">
                                         編集
                                     </button>
                                     <button class="btn btn-sm btn-danger delete-spending" data-id="${spending.id}">
@@ -275,38 +286,23 @@
             const id = $(this).data('id');
             const money = $(this).data('money');
             const item = $(this).data('item');
+            const description = $(this).data('description');
 
-            // フォーカスを解放
-            $(this).blur();
+            $('#edit_spending_id').val(id);
+            $('#edit_tgtmoney').val(money);
+            $('#edit_tgtitem').val(item);
+            $('#edit_description').val(description);
 
-            // 一覧モーダルを閉じる前にフォーカスを移動
-            $('#dailySpendingList').one('hide.bs.modal', function() {
-                setTimeout(() => {
-                    // 編集フォームに値をセット
-                    $('#edit_spending_id').val(id);
-                    $('#edit_tgtmoney').val(money);
-                    $('#edit_tgtitem').val(item);
-
-                    // 編集モーダルを表示
-                    $('#editSpendingModal').modal('show');
-
-                    // 編集モーダルが表示された後にフォーカスを設定
-                    $('#editSpendingModal').one('shown.bs.modal', function() {
-                        $('#edit_tgtmoney').focus();
-                    });
-                }, 150);
-            });
-
-            // 一覧モーダルを閉じる
-            $('#dailySpendingList').modal('hide');
+            $('#editSpendingModal').modal('show');
         });
 
-        // 保存ボタンのクリックイベント
+        // 保存ボタンのクリックイベントを修正（一覧モーダルを閉じないように）
         $('#saveEdit').on('click', function() {
             const id = $('#edit_spending_id').val();
             const data = {
                 tgtmoney: $('#edit_tgtmoney').val(),
                 tgtitem: $('#edit_tgtitem').val(),
+                description: $('#edit_description').val(),
                 _token: $('meta[name="csrf-token"]').attr('content')
             };
 
@@ -315,12 +311,51 @@
                 method: 'PUT',
                 data: data,
                 success: function(response) {
-                    // 両方のモーダルを閉じる
                     $('#editSpendingModal').modal('hide');
-                    $('#dailySpendingList').modal('hide');
 
-                    // カレンダーを更新
-                    calendarInstance.loadData();
+                    // 一覧を再読み込み
+                    const date = $('#dailySpendingListLabel').text().split(' ')[0];
+                    $.ajax({
+                        url: '/money/daily/' + date,
+                        method: 'GET',
+                        success: function(data) {
+                            $('#spendingListBody').empty();
+
+                            data.forEach(function(spending) {
+                                const itemNames = {
+                                    1: '食費',
+                                    2: '日用品',
+                                    3: '衣服',
+                                    4: '交通費',
+                                    5: 'その他'
+                                };
+
+                                const row = `
+                                    <tr>
+                                        <td>${Number(spending.tgtmoney).toLocaleString()}円</td>
+                                        <td>${itemNames[spending.tgtitem] || '不明'}</td>
+                                        <td>${spending.description || '説明なし'}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary edit-spending mr-2"
+                                                    data-id="${spending.id}"
+                                                    data-money="${spending.tgtmoney}"
+                                                    data-item="${spending.tgtitem}"
+                                                    data-description="${spending.description || ''}">
+                                                編集
+                                            </button>
+                                            <button class="btn btn-sm btn-danger delete-spending" data-id="${spending.id}">
+                                                削除
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `;
+                                $('#spendingListBody').append(row);
+                            });
+
+                            // カレンダーも更新
+                            calendarInstance.loadData();
+                        }
+                    });
                 },
                 error: function() {
                     alert('更新に失敗しました');
@@ -404,6 +439,7 @@
                         <thead>
                             <tr>
                                 <th>金額</th>
+                                <th>項目</th>
                                 <th>説明</th>
                                 <th>操作</th>
                             </tr>
@@ -440,7 +476,12 @@
                     <input type="hidden" id="edit_spending_id">
                     <div class="form-group">
                         <label for="edit_tgtmoney">金額</label>
-                        <input type="number" class="form-control" id="edit_tgtmoney" required>
+                        <input type="number"
+                               class="form-control"
+                               id="edit_tgtmoney"
+                               required
+                               style="-webkit-appearance: none; margin: 0;"
+                               onwheel="return false;">
                     </div>
                     <div class="form-group">
                         <label for="edit_tgtitem">項目</label>
@@ -451,6 +492,10 @@
                             <option value="4">交通費</option>
                             <option value="5">その他</option>
                         </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_description">説明</label>
+                        <input type="text" class="form-control" id="edit_description">
                     </div>
                 </form>
             </div>

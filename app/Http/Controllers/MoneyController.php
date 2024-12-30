@@ -85,13 +85,15 @@ class MoneyController extends Controller
 
     public function update(Request $request, $id)
     {
+        $validated = $request->validate([
+            'tgtmoney' => 'required|numeric',
+            'tgtitem' => 'required|numeric|between:1,5',
+            'description' => 'nullable|string|max:255',
+        ]);
 
         $spending = Spending::findOrFail($id);
-        $spending->update([
-            'tgtmoney' => $request->tgtmoney,
-            'tgtitem' => $request->tgtitem,
-        ]);
-        \Log::info('Requested spending: ' . $spending);
-        return response()->json($spending);
+        $spending->update($validated);
+
+        return response()->json(['message' => '更新しました']);
     }
 }
