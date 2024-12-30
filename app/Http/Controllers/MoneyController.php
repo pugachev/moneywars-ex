@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Spending;
+use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use DateTime;
-use App\Models\Spending;
 
 class MoneyController extends Controller
 {
@@ -25,7 +25,7 @@ class MoneyController extends Controller
 
         $spendings = DB::table('spendings')
             ->select(
-                DB::raw('DAY(tgtdate) as day'),  // 日付の日部分のみ
+                DB::raw('DAY(tgtdate) as day'), // 日付の日部分のみ
                 DB::raw('SUM(tgtmoney) as amount')
             )
             ->whereYear('tgtdate', $year)
@@ -34,19 +34,19 @@ class MoneyController extends Controller
             ->get()
             ->map(function ($item) {
                 return [
-                    'day' => (int)$item->day,
+                    'day' => (int) $item->day,
                     'title' => number_format($item->amount) . '円',
-                    'type' => 'expense'
+                    'type' => 'expense',
                 ];
             })
             ->values()
             ->toArray();
 
         return response()->json([
-            'event' => $spendings,    // 注意: "events" ではなく "event"
-            'year' => (int)$year,
-            'month' => (int)$month,
-            'holiday' => []           // 必要に応じて休日データを設定
+            'event' => $spendings, // 注意: "events" ではなく "event"
+            'year' => (int) $year,
+            'month' => (int) $month,
+            'holiday' => [], // 必要に応じて休日データを設定
         ]);
     }
 
@@ -55,16 +55,43 @@ class MoneyController extends Controller
         $validated = $request->validate([
             'date' => 'required|date',
             'amount' => 'required|numeric',
-            'description' => 'nullable|string|max:255',
+            'tgtitem' => 'required|numeric|between:1,5',
         ]);
 
         Spending::create([
             'tgtdate' => $validated['date'],
             'tgtmoney' => $validated['amount'],
-            'tgtitem' => 1  // 仮の値として1を設定
+            'tgtitem' => $validated['tgtitem'],
         ]);
 
         return redirect()->route('money.index')
             ->with('message', '支出を登録しました。');
+    }
+
+    public function daily($date)
+    {
+        \Log::info('Requested date: ' . $date);
+        $spendings = Spending::whereDate('tgtdate', $date)->get();
+        \Log::info('Found spendings:', $spendings->toArray());
+        return response()->json($spendings);
+    }
+
+    public function destroy($id)
+    {
+        $spending = Spending::findOrFail($id);
+        $spending->delete();
+        return response()->json(['success' => true]);
+    }
+
+    public function update(Request $request, $id)
+    {
+
+        $spending = Spending::findOrFail($id);
+        $spending->update([
+            'tgtmoney' => $request->tgtmoney,
+            'tgtitem' => $request->tgtitem,
+        ]);
+        \Log::info('Requested spending: ' . $spending);
+        return response()->json($spending);
     }
 }
