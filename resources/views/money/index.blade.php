@@ -10,7 +10,7 @@
     <meta name="base-url" content="{{ url('/') }}">
     <link rel="shortcut icon" href="{{ asset('/favicon.png') }}">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
-    <title>MoneyWars</title>
+    <title>moneywars</title>
     <style>
         /* Chrome, Safari, Edge, Opera */
         input[type=number]::-webkit-inner-spin-button,
