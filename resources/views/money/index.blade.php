@@ -36,7 +36,7 @@
             <ul class="navbar-nav d-flex align-items-center">
                 <li class="nav-item active d-flex align-items-center">
                     <span>
-                        <a class="nav-link" href="#" data-toggle="modal" data-target="#addSpendingModal">
+                        <a class="nav-link" href="#" data-toggle="modal" data-target="#addSpendingModal" style="color: #ffffff;font-weight: bold;">
                             新規
                         </a>
                     </span>
