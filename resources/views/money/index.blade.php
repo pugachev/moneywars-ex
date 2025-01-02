@@ -141,7 +141,10 @@
         });
 
         window.routes = {
-            moneyJson: "{{ route('money.json') }}"
+            moneyJson: "{{ route('money.json') }}",
+            moneyDaily: "{{ url('money/daily') }}/",
+            moneyDestroy: "{{ url('money') }}/",
+            moneyUpdate: "{{ url('money') }}/"
         };
 
         // インスタンス生成の修正
@@ -180,14 +183,10 @@
 
         // カレンダーのセルクリックイベント
         $(document).on('click', 'td[id^="calender-id"]', function() {
-            // デバッグログ
             console.log('Clicked cell:', this);
 
-            // IDから日付を取得（例：calender-id1 → 1）
-            const day = $(this).attr('id').replace('calender-id', '').padStart(2, '0');
-
-            // calendar-year-monthから年月を取得
-            const yearMonth = $('.calendar-year-month').text(); // 例: "2024年3月"
+            const date = $(this).attr('id').replace('calender-id', '').padStart(2, '0');
+            const yearMonth = $('.calendar-year-month').text();
             const matches = yearMonth.match(/(\d{4})年(\d{1,2})月/);
 
             if (!matches) {
@@ -197,51 +196,18 @@
 
             const year = matches[1];
             const month = matches[2].padStart(2, '0');
-            const date = `${year}-${month}-${day}`;
+            const fullDate = `${year}-${month}-${date}`;
 
-            console.log('Constructed date:', { year, month, day, date });
+            // URLを構築（末尾にスラッシュがあるので直接結合可能）
+            const url = window.routes.moneyDaily + fullDate;
 
-            // 支出一覧を取得して表示
             $.ajax({
-                url: '/money/daily/' + date,
+                url: url,
                 method: 'GET',
+                dataType: 'json',
                 success: function(data) {
-                    $('#spendingListBody').empty();
-                    $('#dailySpendingListLabel').text(date + ' の支出一覧');
-
-                    // 項目の表示名を定義
-                    const itemNames = {
-                        1: '食費',
-                        2: '日用品',
-                        3: '衣服',
-                        4: '交通費',
-                        5: 'その他'
-                    };
-
-                    data.forEach(function(spending) {
-                        const row = `
-                            <tr>
-                                <td>${Number(spending.tgtmoney).toLocaleString()}円</td>
-                                <td>${itemNames[spending.tgtitem] || '不明'}</td>
-                                <td>${spending.description || '説明なし'}</td>
-                                <td>
-                                    <button class="btn btn-sm btn-primary edit-spending mr-2"
-                                            data-id="${spending.id}"
-                                            data-money="${spending.tgtmoney}"
-                                            data-item="${spending.tgtitem}"
-                                            data-description="${spending.description || ''}">
-                                        編集
-                                    </button>
-                                    <button class="btn btn-sm btn-danger delete-spending" data-id="${spending.id}">
-                                        削除
-                                    </button>
-                                </td>
-                            </tr>
-                        `;
-                        $('#spendingListBody').append(row);
-                    });
-
-                    $('#dailySpendingList').modal('show');
+                    console.log('Success:', data);
+                    updateSpendingList(data, fullDate);
                 },
                 error: function(xhr, status, error) {
                     console.error('Error details:', {
@@ -249,23 +215,19 @@
                         error: error,
                         response: xhr.responseText
                     });
-                    alert('データの取得に失敗しました: ' + error);
+                    alert('データの取得に失敗しました');
                 }
             });
-
-            // 新規登録用の日付もセット
-            $('#selected_date').val(date);
         });
 
         // 削除ボタンのクリックイベント
         $(document).on('click', '.delete-spending', function() {
             if (confirm('本当に削除しますか？')) {
-                // フォーカスを解放
                 $(this).blur();
 
                 const id = $(this).data('id');
                 $.ajax({
-                    url: '/money/' + id,
+                    url: window.routes.moneyDestroy + id,
                     method: 'DELETE',
                     data: {
                         _token: $('meta[name="csrf-token"]').attr('content')
@@ -296,7 +258,7 @@
             $('#editSpendingModal').modal('show');
         });
 
-        // 保存ボタンのクリックイベントを修正（一覧モーダルを閉じないように）
+        // 保存ボタンのクリックイベントを修正
         $('#saveEdit').on('click', function() {
             const id = $('#edit_spending_id').val();
             const data = {
@@ -307,7 +269,7 @@
             };
 
             $.ajax({
-                url: '/money/' + id,
+                url: window.routes.moneyUpdate + id,
                 method: 'PUT',
                 data: data,
                 success: function(response) {
@@ -316,7 +278,7 @@
                     // 一覧を再読み込み
                     const date = $('#dailySpendingListLabel').text().split(' ')[0];
                     $.ajax({
-                        url: '/money/daily/' + date,
+                        url: window.routes.moneyDaily + date,
                         method: 'GET',
                         success: function(data) {
                             $('#spendingListBody').empty();
@@ -354,6 +316,9 @@
 
                             // カレンダーも更新
                             calendarInstance.loadData();
+                        },
+                        error: function() {
+                            alert('データの取得に失敗しました');
                         }
                     });
                 },
@@ -363,21 +328,31 @@
             });
         });
 
-        // 一覧の更新用関数
+        // 一覧の更新用関数を修正
         function updateSpendingList(data, date) {
             $('#spendingListBody').empty();
             $('#dailySpendingListLabel').text(date + ' の支出一覧');
+
+            const itemNames = {
+                1: '食費',
+                2: '日用品',
+                3: '衣服',
+                4: '交通費',
+                5: 'その他'
+            };
 
             data.forEach(function(spending) {
                 const row = `
                     <tr>
                         <td>${Number(spending.tgtmoney).toLocaleString()}円</td>
+                        <td>${itemNames[spending.tgtitem] || '不明'}</td>
                         <td>${spending.description || '説明なし'}</td>
                         <td>
                             <button class="btn btn-sm btn-primary edit-spending mr-2"
                                     data-id="${spending.id}"
                                     data-money="${spending.tgtmoney}"
-                                    data-item="${spending.tgtitem}">
+                                    data-item="${spending.tgtitem}"
+                                    data-description="${spending.description || ''}">
                                 編集
                             </button>
                             <button class="btn btn-sm btn-danger delete-spending" data-id="${spending.id}">
@@ -412,6 +387,13 @@
         $('#dailySpendingList, #editSpendingModal').on('hide.bs.modal', function() {
             // モーダル内の全てのフォーカス可能な要素からフォーカスを解放
             $(this).find('button, input, select, textarea').blur();
+        });
+
+        // jQueryの設定
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
         });
       });
     </script>
