@@ -76,6 +76,26 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/locales/bootstrap-datepicker.ja.min.js"></script>
     <script type="text/javascript">
 
+      const ITEM_NAMES = {
+        1: '食費',
+        2: '日用品',
+        3: '衣服',
+        4: '交通費',
+        5: 'その他'
+      };
+
+      const MESSAGES = {
+          success: {
+              update: '更新しました',
+              delete: '削除しました'
+          },
+          error: {
+              fetch: 'データの取得に失敗しました',
+              update: '更新に失敗しました',
+              delete: '削除に失敗しました'
+          }
+      };
+
       $(function(){
         // アラートメッセージを3秒後に消す
         if ($('#alert').length > 0) {
@@ -284,18 +304,10 @@
                             $('#spendingListBody').empty();
 
                             data.forEach(function(spending) {
-                                const itemNames = {
-                                    1: '食費',
-                                    2: '日用品',
-                                    3: '衣服',
-                                    4: '交通費',
-                                    5: 'その他'
-                                };
-
                                 const row = `
                                     <tr>
                                         <td>${Number(spending.tgtmoney).toLocaleString()}円</td>
-                                        <td>${itemNames[spending.tgtitem] || '不明'}</td>
+                                        <td>${ITEM_NAMES[spending.tgtitem] || '不明'}</td>
                                         <td>${spending.description || '説明なし'}</td>
                                         <td>
                                             <button class="btn btn-sm btn-primary edit-spending mr-2"
@@ -333,19 +345,11 @@
             $('#spendingListBody').empty();
             $('#dailySpendingListLabel').text(date + ' の支出一覧');
 
-            const itemNames = {
-                1: '食費',
-                2: '日用品',
-                3: '衣服',
-                4: '交通費',
-                5: 'その他'
-            };
-
             data.forEach(function(spending) {
                 const row = `
                     <tr>
                         <td>${Number(spending.tgtmoney).toLocaleString()}円</td>
-                        <td>${itemNames[spending.tgtitem] || '不明'}</td>
+                        <td>${ITEM_NAMES[spending.tgtitem] || '不明'}</td>
                         <td>${spending.description || '説明なし'}</td>
                         <td>
                             <button class="btn btn-sm btn-primary edit-spending mr-2"
