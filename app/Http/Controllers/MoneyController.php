@@ -21,7 +21,7 @@ class MoneyController extends Controller
         $date = new DateTime($tgtdate);
 
         $year = $date->format('Y');
-        $month = $date->format('n'); // 先頭の0を除いた月
+        $month = $date->format('n');
 
         // 月間合計を取得
         $monthlyTotal = DB::table('spendings')
@@ -59,10 +59,10 @@ class MoneyController extends Controller
             ->toArray();
 
         return response()->json([
-            'event' => $spendings, // 注意: "events" ではなく "event"
+            'event' => $spendings,
             'year' => (int) $year,
             'month' => (int) $month,
-            'holiday' => [], // 必要に応じて休日データを設定
+            'holiday' => [],
             'monthlyTotal' => $monthlyTotal,
         ]);
     }

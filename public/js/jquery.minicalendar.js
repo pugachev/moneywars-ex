@@ -178,17 +178,23 @@
             dataType: "json",
             async: true,
             success: function(data) {
-                // MoneyControllerから取得したデータを設定
-                self.events = data.event; // 支出データ
-                self.year = data.year; // 年
-                self.month = data.month; // 月
-                self.date = new Date(data.year, data.month - 1, 1); // 日付オブジェクト
-                self.holiday = data.holiday; // 休日データ
+                console.log('API Response:', data);
+                console.log('Monthly Total:', data.monthlyTotal);
 
-                // 合計金額を更新
+                // 合計金額を更新（先に更新）
                 if (data.monthlyTotal !== undefined) {
+                    console.log('Updating monthly total to:', Number(data.monthlyTotal).toLocaleString());
                     $('#monthlyTotal').text(Number(data.monthlyTotal).toLocaleString());
+                } else {
+                    console.warn('Monthly total is undefined in response');
                 }
+
+                // MoneyControllerから取得したデータを設定
+                self.events = data.event;
+                self.year = data.year;
+                self.month = data.month;
+                self.date = new Date(data.year, data.month - 1, 1);
+                self.holiday = data.holiday;
 
                 // カレンダーを再描画
                 self.printType(self.year, self.month);
