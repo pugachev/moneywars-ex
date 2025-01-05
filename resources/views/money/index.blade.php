@@ -23,6 +23,27 @@
         input[type=number] {
             -moz-appearance: textfield;
         }
+
+        .calendar-head {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .calendar-header-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        .calendar-year-month {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+        }
+        .monthly-total {
+            font-size: 16px;
+            color: #dc3545;
+            margin: 0 0 10px 0;
+        }
     </style>
   </head>
   <body>

@@ -40,7 +40,14 @@
      * 枠を作成
      */
     createFrame : function() {
-      this.ele.append('<div class="calendar-head"><p class="calendar-year-month"></p></div>');
+      this.ele.append(`
+        <div class="calendar-head">
+          <div class="calendar-header-content">
+            <p class="calendar-year-month"></p>
+            <p class="monthly-total">今月の合計: <span id="monthlyTotal">0</span>円</p>
+          </div>
+        </div>
+      `);
 
       var outText = '<table><thead><tr>';
       for (var i = 0; i < this.opts.weekType.length; i++) {
@@ -177,6 +184,11 @@
                 self.month = data.month; // 月
                 self.date = new Date(data.year, data.month - 1, 1); // 日付オブジェクト
                 self.holiday = data.holiday; // 休日データ
+
+                // 合計金額を更新
+                if (data.monthlyTotal !== undefined) {
+                    $('#monthlyTotal').text(Number(data.monthlyTotal).toLocaleString());
+                }
 
                 // カレンダーを再描画
                 self.printType(self.year, self.month);

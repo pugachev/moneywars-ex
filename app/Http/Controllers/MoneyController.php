@@ -23,6 +23,22 @@ class MoneyController extends Controller
         $year = $date->format('Y');
         $month = $date->format('n'); // 先頭の0を除いた月
 
+        // 月間合計を取得
+        $monthlyTotal = DB::table('spendings')
+            ->whereYear('tgtdate', $year)
+            ->whereMonth('tgtdate', $month)
+            ->sum('tgtmoney');
+
+        \Log::info('Monthly total calculation:', [
+            'year' => $year,
+            'month' => $month,
+            'total' => $monthlyTotal,
+            'sql' => DB::table('spendings')
+                ->whereYear('tgtdate', $year)
+                ->whereMonth('tgtdate', $month)
+                ->toSql(),
+        ]);
+
         $spendings = DB::table('spendings')
             ->select(
                 DB::raw('DAY(tgtdate) as day'), // 日付の日部分のみ
@@ -47,6 +63,7 @@ class MoneyController extends Controller
             'year' => (int) $year,
             'month' => (int) $month,
             'holiday' => [], // 必要に応じて休日データを設定
+            'monthlyTotal' => $monthlyTotal,
         ]);
     }
 
