@@ -13,6 +13,7 @@ return new class extends Migration
             $table->date('tgtdate');
             $table->integer('tgtmoney');
             $table->integer('tgtitem');
+            $table->string('description')->nullable();
             $table->timestamps();
         });
     }
