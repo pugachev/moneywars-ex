@@ -18,3 +18,9 @@ php artisan migrate --seed
 
 (7)key generateする
 php artisan key:generate
+
+
+
+
+git config --global user.name "pugachev"
+git config --global user.email "pugachev@gmail.com"
