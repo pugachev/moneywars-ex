@@ -49,9 +49,41 @@
                         @endforeach
                     </tbody>
                 </table>
+
+                <!-- ページネーションの表示を中央寄せに修正 -->
+                <div class="d-flex flex-column align-items-center mt-4">
+                    <div class="text-muted mb-2">
+                        全{{ $spendings->total() }}件中
+                        {{ $spendings->firstItem() }}~{{ $spendings->lastItem() }}件を表示
+                    </div>
+                    <div>
+                        {{ $spendings->appends(['keyword' => $keyword])->links('pagination::bootstrap-4') }}
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- ページネーションのスタイルを修正 -->
+    <style>
+    .pagination {
+        margin: 0;
+        justify-content: center;
+    }
+    .page-item.active .page-link {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+    .page-link {
+        color: #dc3545;
+    }
+    .page-link:hover {
+        color: #dc3545;
+    }
+    .page-item.disabled .page-link {
+        color: #6c757d;
+    }
+    </style>
 
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"></script>
