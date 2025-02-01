@@ -49,6 +49,33 @@
         </div>
       `);
 
+      // ナビゲーションボタンのイベントを設定
+      $(document).on('click', '.prev-month', () => {
+        console.log('Previous month clicked');
+        if (this.month === 1) {
+          this.year--;
+          this.month = 12;
+        } else {
+          this.month--;
+        }
+        const targetDate = `${this.year}-${this.month.toString().padStart(2, '0')}-01`;
+        console.log('Loading data for:', targetDate);
+        this.loadData(targetDate);
+      });
+
+      $(document).on('click', '.next-month', () => {
+        console.log('Next month clicked');
+        if (this.month === 12) {
+          this.year++;
+          this.month = 1;
+        } else {
+          this.month++;
+        }
+        const targetDate = `${this.year}-${this.month.toString().padStart(2, '0')}-01`;
+        console.log('Loading data for:', targetDate);
+        this.loadData(targetDate);
+      });
+
       var outText = '<table><thead><tr>';
       for (var i = 0; i < this.opts.weekType.length; i++) {
         if (i === 0) {
@@ -68,66 +95,87 @@
     /**
      * 日付・曜日の配置
      */
-    printType : function(thisYear, thisMonth) {
-      let tgtyearmonth = thisYear + '年' + thisMonth+ '月';
-      $(this.ele).find('.calendar-year-month').text(tgtyearmonth);
-      var thisDate = new Date(thisYear, thisMonth-1, 1);
-      console.log($('.calendar-year-month').text());
+    printType : function(thisYear, thisMonth, skipDataLoad = false) {
+        console.log('Printing calendar for:', thisYear, thisMonth);
+        
+        // 年月を表示
+        let tgtyearmonth = thisYear + '年' + thisMonth+ '月';
+        $(this.ele).find('.calendar-year-month').text(tgtyearmonth);
+        
+        // 対象月の日付を生成
+        var thisDate = new Date(thisYear, thisMonth-1, 1);
 
-      // 開始の曜日
-      var startWeek = thisDate.getDay();
+        // データの再取得は skipDataLoad が false の時のみ
+        if (!skipDataLoad) {
+            const targetDate = `${thisYear}-${thisMonth.toString().padStart(2, '0')}-01`;
+            this.loadData(targetDate);
+            return; // データロード後に再度呼ばれるので、ここで終了
+        }
 
-      var lastday = new Date(thisYear, thisMonth, 0).getDate();
-      // 縦の数
-      //var rowMax = Math.ceil((lastday + (startWeek+1)) / 7);
-      var rowMax = Math.ceil((lastday + startWeek) / 7);
+        // 月間合計を表示（既存の値を保持）
+        const currentTotal = $('#monthlyTotal').text();
+        console.log('Current monthly total:', currentTotal);
+        if (currentTotal === '0') {
+            // APIから取得した合計があれば使用
+            const apiTotal = this.events.reduce((sum, event) => sum + Number(event.amount || 0), 0);
+            console.log('Calculated API total:', apiTotal);
+            $('#monthlyTotal').text(apiTotal.toLocaleString());
+        }
 
-      var outText = '<tr>';
-      var countDate = 1;
-      // 最初の空白を出力
-      for (var i = 0; i < startWeek; i++) {
-        outText += '<td class="calendar-none">&nbsp;</td>';
-      }
-      for (var row = 0; row < rowMax; row++) {
-        // 最初の行は曜日の最初から
-        if (row == 0) {
-          for (var col = startWeek; col < 7; col++) {
-            outText += printTD(countDate, col);
-            countDate++;
-          }
-        } else {
-          // 2行目から
-          outText += '<tr>';
-          for (var col = 0; col < 7; col++) {
-            if (lastday >= countDate) {
+        // 開始の曜日
+        var startWeek = thisDate.getDay();
+
+        var lastday = new Date(thisYear, thisMonth, 0).getDate();
+        // 縦の数
+        //var rowMax = Math.ceil((lastday + (startWeek+1)) / 7);
+        var rowMax = Math.ceil((lastday + startWeek) / 7);
+
+        var outText = '<tr>';
+        var countDate = 1;
+        // 最初の空白を出力
+        for (var i = 0; i < startWeek; i++) {
+          outText += '<td class="calendar-none">&nbsp;</td>';
+        }
+        for (var row = 0; row < rowMax; row++) {
+          // 最初の行は曜日の最初から
+          if (row == 0) {
+            for (var col = startWeek; col < 7; col++) {
               outText += printTD(countDate, col);
-            } else {
-              outText += '<td class="calendar-none">&nbsp;</td>';
+              countDate++;
             }
-            countDate++;
+          } else {
+            // 2行目から
+            outText += '<tr>';
+            for (var col = 0; col < 7; col++) {
+              if (lastday >= countDate) {
+                outText += printTD(countDate, col);
+              } else {
+                outText += '<td class="calendar-none">&nbsp;</td>';
+              }
+              countDate++;
+            }
+          }
+          outText += '</tr>';
+        }
+        $(this.ele).find('tbody').html(outText);
+
+        function printTD(count, col) {
+          var dayText = "";
+          var tmpId = ' id="calender-id'+ count + '"';
+          // 曜日classを割り当てる
+          if (col === 0) tmpId += ' class="calendar-sun"';
+          if (col === 6) tmpId += ' class="calendar-sat"';
+          return '<td' + tmpId + '><i class="calendar-day-number">' + count + '</i><div class="calendar-labels">' + dayText + '</div></td>';
+        }
+
+        //今日の日付をマーク
+        var toDay = new Date();
+        if (thisYear === toDay.getFullYear()) {
+          if (thisMonth === (toDay.getMonth()+1)) {
+            var dateID = 'calender-id' + toDay.getDate();
+            $(this.ele).find('#' + dateID).addClass('calendar-today');
           }
         }
-        outText += '</tr>';
-      }
-      $(this.ele).find('tbody').html(outText);
-
-      function printTD(count, col) {
-        var dayText = "";
-        var tmpId = ' id="calender-id'+ count + '"';
-        // 曜日classを割り当てる
-        if (col === 0) tmpId += ' class="calendar-sun"';
-        if (col === 6) tmpId += ' class="calendar-sat"';
-        return '<td' + tmpId + '><i class="calendar-day-number">' + count + '</i><div class="calendar-labels">' + dayText + '</div></td>';
-      }
-
-      //今日の日付をマーク
-      var toDay = new Date();
-      if (thisYear === toDay.getFullYear()) {
-        if (thisMonth === (toDay.getMonth()+1)) {
-          var dateID = 'calender-id' + toDay.getDate();
-          $(this.ele).find('#' + dateID).addClass('calendar-today');
-        }
-      }
     },
     /**
      * イベントの表示
@@ -159,7 +207,9 @@
         var self = this;
         let csrfToken = $('meta[name="csrf-token"]').attr('content');
 
+        // 対象日付の設定
         const defaultTgtDate = targetDate || `${new Date().getFullYear()}-${(new Date().getMonth() + 1).toString().padStart(2, '0')}-01`;
+        console.log('loadData called with date:', defaultTgtDate);
 
         $.ajaxSetup({
             headers: {
@@ -171,6 +221,7 @@
         if (defaultTgtDate) {
             url += `?tgtdate=${defaultTgtDate}`;
         }
+        console.log('Requesting URL:', url);
 
         $.ajax({
             type: "GET",
@@ -178,31 +229,44 @@
             dataType: "json",
             async: true,
             success: function(data) {
-                console.log('API Response:', data);
-                console.log('Monthly Total:', data.monthlyTotal);
-
-                // 合計金額を更新（先に更新）
-                if (data.monthlyTotal !== undefined) {
-                    console.log('Updating monthly total to:', Number(data.monthlyTotal).toLocaleString());
-                    $('#monthlyTotal').text(Number(data.monthlyTotal).toLocaleString());
-                } else {
-                    console.warn('Monthly total is undefined in response');
-                }
-
+                console.log('API Response for date ' + defaultTgtDate + ':', data);
+                
                 // MoneyControllerから取得したデータを設定
-                self.events = data.event;
+                self.events = data.event || [];
                 self.year = data.year;
                 self.month = data.month;
-                self.date = new Date(data.year, data.month - 1, 1);
-                self.holiday = data.holiday;
+                self.holiday = data.holiday || [];
+
+                // 合計金額を更新（文字列の場合は数値に変換）
+                const monthlyTotal = data.monthlyTotal ? Number(data.monthlyTotal) : 
+                    // monthlyTotalがない場合は、eventsから合計を計算
+                    data.event.reduce((sum, event) => sum + Number(event.amount || 0), 0);
+
+                console.log('Calculated monthly total:', monthlyTotal);
+                
+                // 合計金額を表示用にフォーマット
+                $('#monthlyTotal').text(monthlyTotal.toLocaleString());
+                
+                // カスタムイベントを発火
+                console.log('Triggering calendarDataLoaded with monthlyTotal:', monthlyTotal);
+                $(document).trigger('calendarDataLoaded', {
+                    monthlyTotal: monthlyTotal
+                });
 
                 // カレンダーを再描画
-                self.printType(self.year, self.month);
+                self.printType(self.year, self.month, true);
                 self.setEvent();
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 console.error("MoneyControllerからのデータ取得に失敗:", textStatus);
                 console.error("エラー詳細:", errorThrown);
+                console.error("Response:", jqXHR.responseText);
+                
+                // エラー時は合計を0にリセット
+                $('#monthlyTotal').text('0');
+                $(document).trigger('calendarDataLoaded', {
+                    monthlyTotal: 0
+                });
             }
         });
     }
