@@ -33,7 +33,7 @@
                     <tbody>
                         @foreach($spendings as $spending)
                             <tr>
-                                <td>{{ $spending->created_at->format('Y-m-d') }}</td>
+                                <td>{{ \Carbon\Carbon::parse($spending->tgtdate)->format('Y-m-d') }}</td>
                                 <td>{{ number_format($spending->tgtmoney) }}円</td>
                                 <td>
                                     @switch($spending->tgtitem)

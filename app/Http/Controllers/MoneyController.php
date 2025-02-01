@@ -118,12 +118,12 @@ class MoneyController extends Controller
     {
         $keyword = $request->input('keyword');
 
-        $spendings = Spending::where('description', 'LIKE', "%{$keyword}%")
-            ->orderBy('created_at', 'desc')
-            ->paginate(10); // 1ページあたり10件表示
+        $spendings = \App\Models\Spending::where('description', 'LIKE', "%{$keyword}%")
+            ->orderBy('tgtdate', 'desc')  // created_atではなくtgtdateでソート
+            ->paginate(10);
 
-        $totalAmount = Spending::where('description', 'LIKE', "%{$keyword}%")
-            ->sum('tgtmoney'); // 全検索結果の合計金額を計算
+        $totalAmount = \App\Models\Spending::where('description', 'LIKE', "%{$keyword}%")
+            ->sum('tgtmoney');
 
         return view('money.search', compact('spendings', 'totalAmount', 'keyword'));
     }
