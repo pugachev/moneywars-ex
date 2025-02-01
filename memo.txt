@@ -24,3 +24,14 @@ php artisan key:generate
 
 git config --global user.name "pugachev"
 git config --global user.email "pugachev@gmail.com"
+
+
+開発第二期
+[目標]
+検索機能を追加する
+
+[具体手順]
+・navbarの「翌月」ボタンの横側に検索窓(テキストボックス)を追加する
+・検索窓に入力した文字列を元に、spendingsテーブルのdescriptionカラムから該当するデータを検索する
+・検索結果を表示する一覧画面を用意する
+・検索結果の一覧画面上部にtgtmoneyの合計金額を表示する

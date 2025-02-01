@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\MoneyController;
+use App\Http\Controllers\SpendingController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -25,3 +26,5 @@ Route::post('/money/store', [MoneyController::class, 'store'])->name('money.stor
 Route::get('/money/daily/{date}', [MoneyController::class, 'daily'])->name('money.daily');
 Route::delete('/money/{id}', [MoneyController::class, 'destroy'])->name('money.destroy');
 Route::put('/money/{id}', [MoneyController::class, 'update'])->name('money.update');
+Route::get('/spendings/search', [SpendingController::class, 'search'])->name('spendings.search');
+Route::get('/money/search', [MoneyController::class, 'search'])->name('money.search');

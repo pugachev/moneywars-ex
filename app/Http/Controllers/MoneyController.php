@@ -113,4 +113,17 @@ class MoneyController extends Controller
 
         return response()->json(['message' => '更新しました']);
     }
+
+    public function search(Request $request)
+    {
+        $keyword = $request->input('keyword');
+
+        $spendings = Spending::where('description', 'LIKE', "%{$keyword}%")
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $totalAmount = $spendings->sum('tgtmoney');
+
+        return view('money.search', compact('spendings', 'totalAmount', 'keyword'));
+    }
 }
