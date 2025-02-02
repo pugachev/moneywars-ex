@@ -69,8 +69,20 @@
                     <!-- 月間目標値を新規作成の隣に配置 -->
                     <span class="ml-3 navbar-text" style="color: #ffffff;font-weight: bold;">月間目標 : 100000円</span>
                     <!-- 月間実測値を月間目標値の隣に配置 -->
-                    <span class="ml-3 navbar-text" style="color: #000000;font-weight: bold;"><a id="prevMonth" class="btn btn-light btn-sm" style="color: black;">前月</a></sapn>
-                    <span class="ml-3 navbar-text" style="color: #000000;font-weight: bold;"><a id="nextMonthLink" class="btn btn-light btn-sm" style="color: black;">翌月</a></sapn>
+                    <span class="ml-3 navbar-text" style="color: #000000;font-weight: bold;"><a id="prevMonth" class="btn btn-light btn-sm" style="color: black;">前月</a></span>
+                    <span class="ml-3 navbar-text" style="color: #000000;font-weight: bold;"><a id="nextMonthLink" class="btn btn-light btn-sm" style="color: black;">翌月</a></span>
+                    <!-- 検索フォームを追加 -->
+                    <form action="{{ route('money.search') }}" method="GET" class="ml-3 d-flex align-items-center">
+                        <input type="text"
+                               name="keyword"
+                               class="form-control form-control-sm"
+                               placeholder="説明文で検索"
+                               style="width: 200px;">
+                        <button type="submit"
+                                class="btn btn-light btn-sm ml-2">
+                            検索
+                        </button>
+                    </form>
                 </li>
             </ul>
         </div>
@@ -219,10 +231,10 @@
         // 新規ボタンの状態を更新する関数を修正
         function updateNewButtonState(monthlyTotal) {
             console.log('Updating new button state with monthly total:', monthlyTotal);
-            
+
             // data-target属性を削除せずにセレクタを使用
             const newButton = $('a.nav-link[data-target="#addSpendingModal"]');
-            
+
             console.log('All possible new buttons found:', {
                 count: newButton.length,
                 elements: newButton.toArray().map(el => ({
@@ -235,7 +247,7 @@
                     html: el.outerHTML
                 }))
             });
-            
+
             if (newButton.length === 0) {
                 console.error('New spending button not found!');
                 // ボタンが見つからない場合は、より広範なセレクタで再試行
@@ -288,7 +300,7 @@
             onDataLoaded: function(data) {
                 // デバッグログを追加
                 console.log('Calendar data loaded:', data);
-                
+
                 // データロード後に月間合計を計算して新規ボタンの状態を更新
                 if (data && data.monthlyTotal) {
                     console.log('Monthly total:', data.monthlyTotal);
@@ -302,11 +314,11 @@
         // データ取得後の処理を追加
         $(document).off('calendarDataLoaded').on('calendarDataLoaded', function(e, data) {
             console.log('Calendar data loaded event:', data);
-            
+
             // monthlyTotalが0または未定義の場合も含めて必ず処理を実行
             const total = data && data.monthlyTotal ? Number(data.monthlyTotal) : 0;
             console.log('Processing monthly total:', total);
-            
+
             // 必ず updateNewButtonState を呼び出す
             updateNewButtonState(total);
         });
