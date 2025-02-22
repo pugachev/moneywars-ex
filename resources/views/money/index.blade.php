@@ -52,7 +52,7 @@
     </style>
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-danger sticky-top mb-0">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-info sticky-top mb-0">
         <a class="navbar-brand" href="{{route('money.index')}}">moneywars</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -229,98 +229,63 @@
         const MONTHLY_TARGET = 100000;
 
         // 新規ボタンの状態を更新する関数を修正
-        function updateNewButtonState(monthlyTotal) {
-            console.log('Updating new button state with monthly total:', monthlyTotal);
+        // function updateNewButtonState(monthlyTotal) {
 
-            // data-target属性を削除せずにセレクタを使用
-            const newButton = $('a.nav-link[data-target="#addSpendingModal"]');
+        //     // data-target属性を削除せずにセレクタを使用
+        //     const newButton = $('a.nav-link[data-target="#addSpendingModal"]');
 
-            console.log('All possible new buttons found:', {
-                count: newButton.length,
-                elements: newButton.toArray().map(el => ({
-                    tagName: el.tagName,
-                    classes: el.className,
-                    attributes: {
-                        dataToggle: $(el).attr('data-toggle'),
-                        dataTarget: $(el).attr('data-target')
-                    },
-                    html: el.outerHTML
-                }))
-            });
+        //     if (newButton.length === 0) {
+        //         // ボタンが見つからない場合は、より広範なセレクタで再試行
+        //         const altButton = $('a.nav-link').first();
+        //         if (altButton.length > 0) {
+        //             // 必要な属性を復元
+        //             altButton.attr('data-target', '#addSpendingModal')
+        //                     .attr('data-toggle', 'modal');
+        //             return updateNewButtonState(monthlyTotal); // 再帰的に呼び出し
+        //         }
+        //         return;
+        //     }
 
-            if (newButton.length === 0) {
-                console.error('New spending button not found!');
-                // ボタンが見つからない場合は、より広範なセレクタで再試行
-                const altButton = $('a.nav-link').first();
-                if (altButton.length > 0) {
-                    console.log('Found button with alternative selector');
-                    // 必要な属性を復元
-                    altButton.attr('data-target', '#addSpendingModal')
-                            .attr('data-toggle', 'modal');
-                    return updateNewButtonState(monthlyTotal); // 再帰的に呼び出し
-                }
-                return;
-            }
+        //     // 数値として比較するために変換
+        //     const total = Number(monthlyTotal);
+        //     if (total >= MONTHLY_TARGET) {
 
-            // 数値として比較するために変換
-            const total = Number(monthlyTotal);
-            console.log('Comparing total:', total, 'with target:', MONTHLY_TARGET);
+        //     } else {
 
-            if (total >= MONTHLY_TARGET) {
-                console.log('Disabling new button - monthly total exceeds target');
-                newButton.addClass('disabled')
-                        .css('cursor', 'not-allowed')
-                        .attr('title', '今月の支出が目標額を超えています')
-                        // data-toggle と data-target は維持
-                        .attr('data-toggle', 'modal')
-                        .attr('data-target', '#addSpendingModal');
-            } else {
-                console.log('Enabling new button');
-                newButton.removeClass('disabled')
-                        .removeAttr('disabled')
-                        .css('cursor', 'pointer')
-                        .attr('title', '')
-                        .attr('data-toggle', 'modal')
-                        .attr('data-target', '#addSpendingModal');
-            }
-
-            // 更新後の状態を確認
-            console.log('Button after update:', {
-                hasDisabledClass: newButton.hasClass('disabled'),
-                dataToggle: newButton.attr('data-toggle'),
-                dataTarget: newButton.attr('data-target'),
-                element: newButton[0]
-            });
-        }
+        //     }
+        // }
 
         // カレンダーインスタンス生成時の処理を修正
         var calendarInstance = $('#mini-calendar').miniCalendar({
             api: true,
             jsonUrl: window.routes.moneyJson,
             onDataLoaded: function(data) {
-                // デバッグログを追加
-                console.log('Calendar data loaded:', data);
-
                 // データロード後に月間合計を計算して新規ボタンの状態を更新
                 if (data && data.monthlyTotal) {
-                    console.log('Monthly total:', data.monthlyTotal);
-                    updateNewButtonState(data.monthlyTotal);
+                    // updateNewButtonState(data.monthlyTotal);
                 } else {
                     console.log('Monthly total not found in data');
                 }
             }
         });
 
-        // データ取得後の処理を追加
-        $(document).off('calendarDataLoaded').on('calendarDataLoaded', function(e, data) {
-            console.log('Calendar data loaded event:', data);
+        // navbarの要素を取得して変数に格納
+        const navbar = document.querySelector('.navbar');
 
+        // データ取得後の処理を追加
+        $(document).on('calendarDataLoaded', function(e, data) {
             // monthlyTotalが0または未定義の場合も含めて必ず処理を実行
             const total = data && data.monthlyTotal ? Number(data.monthlyTotal) : 0;
-            console.log('Processing monthly total:', total);
-
-            // 必ず updateNewButtonState を呼び出す
-            updateNewButtonState(total);
+            if(total >= 100000){
+                navbar.classList.remove('bg-info');
+                navbar.classList.add('bg-danger');
+            }else if(total >= 60000){
+                navbar.classList.remove('bg-info');
+                navbar.classList.add('bg-warning');
+            }else{
+                navbar.classList.remove('bg-warning', 'bg-danger');
+                navbar.classList.add('bg-info');
+            }
         });
 
         // 前月ボタンイベント
@@ -332,9 +297,6 @@
             // 前月の日付を YYYY-MM-DD 形式にフォーマット
             const formattedDate = `${prevMonthDate.getFullYear()}-${String(prevMonthDate.getMonth() + 1).padStart(2, '0')}-01`;
 
-            // デバッグ用ログ
-            console.log('Moving to date:', formattedDate);
-
             // カレンダーの更新を呼び出し
             calendarInstance.loadData(formattedDate);
         });
@@ -345,8 +307,6 @@
             const nextMonthDate = new Date(currentDate.setMonth(currentDate.getMonth() + 1));
 
             const formattedDate = `${nextMonthDate.getFullYear()}-${String(nextMonthDate.getMonth() + 1).padStart(2, '0')}-01`;
-
-            console.log('Moving to date:', formattedDate);
 
             calendarInstance.loadData(formattedDate);
         });
