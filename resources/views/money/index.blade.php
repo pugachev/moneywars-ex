@@ -85,6 +85,12 @@
                     </form>
                 </li>
             </ul>
+            <!-- 右側にグラフボタンを配置 -->
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a href="{{ route('money.graph') }}" class="btn btn-light btn-sm">グラフ</a>
+                </li>
+            </ul>
         </div>
     </nav>
     @if(session('message'))
