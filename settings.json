@@ -1,0 +1,7 @@
+{
+    "window.zoomLevel": 1,  // 全体的なズームレベル
+    "editor.fontSize": 14,  // エディタのフォントサイズ
+    "tree.indent": 18,     // ツリービューのインデント
+    "workbench.tree.indent": 16,  // ワークベンチツリーのインデント
+    "workbench.tree.renderIndentGuides": "always"  // インデントガイドの表示
+} 
