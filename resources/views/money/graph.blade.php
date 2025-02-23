@@ -49,21 +49,28 @@ let myChart = null;
 
 async function updateGraph(month) {
     try {
-        const response = await fetch(`/money/graph/data?month=${month}`);
-        if (!response.ok) {
-            throw new Error('データの取得に失敗しました');
+        // APP_URLを使用して環境を判定
+        const appUrl = '{{ config('app.url') }}';
+        const isProduction = appUrl.includes('moneywars-ex.ikefukuro40.tech');
+        const basePath = isProduction ? '/public' : '';
+
+        const response = await fetch(`${basePath}/money/graph/data?month=${month}`);
+
+        if (response.ok) {
+            const data = await response.json();
+
+            // タブの状態を更新
+            document.querySelectorAll('#monthTabs .nav-link').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.dataset.month === month) {
+                    tab.classList.add('active');
+                }
+            });
+
+            createChart(data);
+        } else {
+            throw new Error(`データの取得に失敗しました (${response.status})`);
         }
-        const data = await response.json();
-
-        // タブの状態を更新
-        document.querySelectorAll('#monthTabs .nav-link').forEach(tab => {
-            tab.classList.remove('active');
-            if (tab.dataset.month === month) {
-                tab.classList.add('active');
-            }
-        });
-
-        createChart(data);
     } catch (error) {
         console.error('Error:', error);
         alert('データの取得に失敗しました');
