@@ -25,7 +25,7 @@ body {
     </div>
 </nav>
 
-<div class="container">
+<div class="container mt-5">
     <!-- タブナビゲーション -->
     <ul class="nav nav-tabs mb-4" id="monthTabs">
         @foreach($months as $month)
