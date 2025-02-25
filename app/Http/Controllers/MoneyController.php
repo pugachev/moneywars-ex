@@ -119,7 +119,7 @@ class MoneyController extends Controller
         $keyword = $request->input('keyword');
 
         $spendings = \App\Models\Spending::where('description', 'LIKE', "%{$keyword}%")
-            ->orderBy('tgtdate', 'desc') // created_atではなくtgtdateでソート
+            ->orderBy('tgtdate', 'desc')  // created_atではなくtgtdateでソート
             ->paginate(10);
 
         $totalAmount = \App\Models\Spending::where('description', 'LIKE', "%{$keyword}%")
