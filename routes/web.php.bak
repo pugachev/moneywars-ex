@@ -28,5 +28,3 @@ Route::delete('/money/{id}', [MoneyController::class, 'destroy'])->name('money.d
 Route::put('/money/{id}', [MoneyController::class, 'update'])->name('money.update');
 Route::get('/spendings/search', [SpendingController::class, 'search'])->name('spendings.search');
 Route::get('/money/search', [MoneyController::class, 'search'])->name('money.search');
-Route::get('/money/graph', [MoneyController::class, 'graph'])->name('money.graph');
-Route::get('/money/graph/data', [MoneyController::class, 'graphData'])->name('money.graph.data');

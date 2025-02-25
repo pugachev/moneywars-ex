@@ -49,6 +49,11 @@
             opacity: 0.6;
             pointer-events: none;
         }
+        /* 新規ボタンの無効化状態のスタイル */
+        .nav-link.disabled {
+            opacity: 0.6;
+            pointer-events: none;
+        }
     </style>
   </head>
   <body>
@@ -83,12 +88,6 @@
                             検索
                         </button>
                     </form>
-                </li>
-            </ul>
-            <!-- 右側にグラフボタンを配置 -->
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                    <a href="{{ route('money.graph') }}" class="btn btn-light btn-sm">グラフ</a>
                 </li>
             </ul>
         </div>
@@ -164,11 +163,31 @@
             $(this).find('button, input, select, textarea').blur();
         });
 
+        // モーダルが閉じられる前のイベント
+        $('#dailySpendingList, #editSpendingModal, #addSpendingModal').on('hide.bs.modal', function() {
+            // モーダル内の全てのフォーカス可能な要素からフォーカスを解放
+            $(this).find('button, input, select, textarea').blur();
+        });
+
         // モーダルが閉じられた時のイベント
         $('#addSpendingModal').on('hidden.bs.modal', function () {
             // フォームをリセット
             $('#addSpendingForm')[0].reset();
             $('#selected_date').val('');
+            // フォーカスを解放
+            $(this).find('button, input, select, textarea').blur();
+        });
+
+        // モーダルが開く前のイベント
+        $('#dailySpendingList, #editSpendingModal, #addSpendingModal').on('show.bs.modal', function() {
+            // 他のモーダルを確実に閉じる
+            $('.modal').not(this).modal('hide');
+        });
+
+        // フォーカス管理の改善
+        $('.modal').on('shown.bs.modal', function() {
+            // モーダルが表示された後、最初のフォーカス可能な要素にフォーカスを設定
+            $(this).find('input:visible, select:visible, textarea:visible').first().focus();
             // フォーカスを解放
             $(this).find('button, input, select, textarea').blur();
         });
@@ -235,63 +254,98 @@
         const MONTHLY_TARGET = 100000;
 
         // 新規ボタンの状態を更新する関数を修正
-        // function updateNewButtonState(monthlyTotal) {
+        function updateNewButtonState(monthlyTotal) {
+            console.log('Updating new button state with monthly total:', monthlyTotal);
 
-        //     // data-target属性を削除せずにセレクタを使用
-        //     const newButton = $('a.nav-link[data-target="#addSpendingModal"]');
+            // data-target属性を削除せずにセレクタを使用
+            const newButton = $('a.nav-link[data-target="#addSpendingModal"]');
 
-        //     if (newButton.length === 0) {
-        //         // ボタンが見つからない場合は、より広範なセレクタで再試行
-        //         const altButton = $('a.nav-link').first();
-        //         if (altButton.length > 0) {
-        //             // 必要な属性を復元
-        //             altButton.attr('data-target', '#addSpendingModal')
-        //                     .attr('data-toggle', 'modal');
-        //             return updateNewButtonState(monthlyTotal); // 再帰的に呼び出し
-        //         }
-        //         return;
-        //     }
+            console.log('All possible new buttons found:', {
+                count: newButton.length,
+                elements: newButton.toArray().map(el => ({
+                    tagName: el.tagName,
+                    classes: el.className,
+                    attributes: {
+                        dataToggle: $(el).attr('data-toggle'),
+                        dataTarget: $(el).attr('data-target')
+                    },
+                    html: el.outerHTML
+                }))
+            });
 
-        //     // 数値として比較するために変換
-        //     const total = Number(monthlyTotal);
-        //     if (total >= MONTHLY_TARGET) {
+            if (newButton.length === 0) {
+                console.error('New spending button not found!');
+                // ボタンが見つからない場合は、より広範なセレクタで再試行
+                const altButton = $('a.nav-link').first();
+                if (altButton.length > 0) {
+                    console.log('Found button with alternative selector');
+                    // 必要な属性を復元
+                    altButton.attr('data-target', '#addSpendingModal')
+                            .attr('data-toggle', 'modal');
+                    return updateNewButtonState(monthlyTotal); // 再帰的に呼び出し
+                }
+                return;
+            }
 
-        //     } else {
+            // 数値として比較するために変換
+            const total = Number(monthlyTotal);
+            console.log('Comparing total:', total, 'with target:', MONTHLY_TARGET);
 
-        //     }
-        // }
+            if (total >= MONTHLY_TARGET) {
+                console.log('Disabling new button - monthly total exceeds target');
+                newButton.addClass('disabled')
+                        .css('cursor', 'not-allowed')
+                        .attr('title', '今月の支出が目標額を超えています')
+                        // data-toggle と data-target は維持
+                        .attr('data-toggle', 'modal')
+                        .attr('data-target', '#addSpendingModal');
+            } else {
+                console.log('Enabling new button');
+                newButton.removeClass('disabled')
+                        .removeAttr('disabled')
+                        .css('cursor', 'pointer')
+                        .attr('title', '')
+                        .attr('data-toggle', 'modal')
+                        .attr('data-target', '#addSpendingModal');
+            }
+
+            // 更新後の状態を確認
+            console.log('Button after update:', {
+                hasDisabledClass: newButton.hasClass('disabled'),
+                dataToggle: newButton.attr('data-toggle'),
+                dataTarget: newButton.attr('data-target'),
+                element: newButton[0]
+            });
+        }
 
         // カレンダーインスタンス生成時の処理を修正
         var calendarInstance = $('#mini-calendar').miniCalendar({
             api: true,
             jsonUrl: window.routes.moneyJson,
             onDataLoaded: function(data) {
+                // デバッグログを追加
+                console.log('Calendar data loaded:', data);
+
                 // データロード後に月間合計を計算して新規ボタンの状態を更新
                 if (data && data.monthlyTotal) {
-                    // updateNewButtonState(data.monthlyTotal);
+                    console.log('Monthly total:', data.monthlyTotal);
+                    updateNewButtonState(data.monthlyTotal);
                 } else {
                     console.log('Monthly total not found in data');
                 }
             }
         });
 
-        // navbarの要素を取得して変数に格納
-        const navbar = document.querySelector('.navbar');
-
         // データ取得後の処理を追加
-        $(document).on('calendarDataLoaded', function(e, data) {
+        $(document).off('calendarDataLoaded').on('calendarDataLoaded', function(e, data) {
+            console.log('Calendar data loaded event:', data);
+
             // monthlyTotalが0または未定義の場合も含めて必ず処理を実行
             const total = data && data.monthlyTotal ? Number(data.monthlyTotal) : 0;
-            if(total >= 100000){
-                navbar.classList.remove('bg-info');
-                navbar.classList.add('bg-danger');
-            }else if(total >= 60000){
-                navbar.classList.remove('bg-info');
-                navbar.classList.add('bg-warning');
-            }else{
-                navbar.classList.remove('bg-warning', 'bg-danger');
-                navbar.classList.add('bg-info');
-            }
+            console.log('Processing monthly total:', total);
+
+            // 必ず updateNewButtonState を呼び出す
+            updateNewButtonState(total);
         });
 
         // 前月ボタンイベント
@@ -307,6 +361,7 @@
             calendarInstance.loadData(formattedDate);
         });
 
+        // 翌月ボタンイベント
         // 翌月ボタンイベント
         $('#nextMonthLink').click(function() {
             const currentDate = new Date(calendarInstance.year, calendarInstance.month - 1, 1);
