@@ -9,29 +9,39 @@ class SpendingsTableSeeder extends Seeder
 {
     public function run()
     {
-        // 既存のデータを全て削除
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         DB::table('spendings')->truncate();
 
-        // 2024年12月のデータ（20件）
-        for ($day = 1; $day <= 20; $day++) {
-            DB::table('spendings')->insert([
-                'tgtdate' => "2024-12-{$day}",
-                'tgtmoney' => rand(1000, 10000),
-                'tgtitem' => rand(1, 5),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+        $sql = file_get_contents(database_path('seeders/ikefuku40_moneywars.sql'));
+
+        // VALUES以降の部分を抽出
+        preg_match('/INSERT INTO `spendings`.*VALUES\s*(.*?);/s', $sql, $matches);
+
+        if (isset($matches[1])) {
+            // 各行のデータを配列に分割
+            $rows = explode("),\n(", trim($matches[1], "()"));
+
+            $spendings = [];
+            foreach ($rows as $row) {
+                $values = str_getcsv($row, ',', "'");
+                $spendings[] = [
+                    'id' => trim($values[0]),
+                    'tgtdate' => trim($values[1], "'"),
+                    'tgtmoney' => trim($values[2]),
+                    'tgtitem' => trim($values[3]),
+                    'description' => $values[4] === 'NULL' ? null : trim($values[4], "'"),
+                    'created_at' => trim($values[5], "'"),
+                    'updated_at' => trim($values[6], "'")
+                ];
+            }
+
+            // チャンクに分割してインサート
+            foreach (array_chunk($spendings, 50) as $chunk) {
+                DB::table('spendings')->insert($chunk);
+            }
         }
 
-        // 2024年11月のデータ（18件）
-        for ($day = 1; $day <= 18; $day++) {
-            DB::table('spendings')->insert([
-                'tgtdate' => "2024-11-{$day}",
-                'tgtmoney' => rand(500, 5000),
-                'tgtitem' => rand(1, 3),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }
+        DB::statement("ALTER TABLE spendings AUTO_INCREMENT = 115;");
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
     }
 }

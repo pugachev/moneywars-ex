@@ -49,10 +49,15 @@
             opacity: 0.6;
             pointer-events: none;
         }
+        /* 新規ボタンの無効化状態のスタイル */
+        .nav-link.disabled {
+            opacity: 0.6;
+            pointer-events: none;
+        }
     </style>
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-danger sticky-top mb-0">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-info sticky-top mb-0">
         <a class="navbar-brand" href="{{route('money.index')}}">moneywars</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -158,11 +163,31 @@
             $(this).find('button, input, select, textarea').blur();
         });
 
+        // モーダルが閉じられる前のイベント
+        $('#dailySpendingList, #editSpendingModal, #addSpendingModal').on('hide.bs.modal', function() {
+            // モーダル内の全てのフォーカス可能な要素からフォーカスを解放
+            $(this).find('button, input, select, textarea').blur();
+        });
+
         // モーダルが閉じられた時のイベント
         $('#addSpendingModal').on('hidden.bs.modal', function () {
             // フォームをリセット
             $('#addSpendingForm')[0].reset();
             $('#selected_date').val('');
+            // フォーカスを解放
+            $(this).find('button, input, select, textarea').blur();
+        });
+
+        // モーダルが開く前のイベント
+        $('#dailySpendingList, #editSpendingModal, #addSpendingModal').on('show.bs.modal', function() {
+            // 他のモーダルを確実に閉じる
+            $('.modal').not(this).modal('hide');
+        });
+
+        // フォーカス管理の改善
+        $('.modal').on('shown.bs.modal', function() {
+            // モーダルが表示された後、最初のフォーカス可能な要素にフォーカスを設定
+            $(this).find('input:visible, select:visible, textarea:visible').first().focus();
             // フォーカスを解放
             $(this).find('button, input, select, textarea').blur();
         });
@@ -332,21 +357,17 @@
             // 前月の日付を YYYY-MM-DD 形式にフォーマット
             const formattedDate = `${prevMonthDate.getFullYear()}-${String(prevMonthDate.getMonth() + 1).padStart(2, '0')}-01`;
 
-            // デバッグ用ログ
-            console.log('Moving to date:', formattedDate);
-
             // カレンダーの更新を呼び出し
             calendarInstance.loadData(formattedDate);
         });
 
+        // 翌月ボタンイベント
         // 翌月ボタンイベント
         $('#nextMonthLink').click(function() {
             const currentDate = new Date(calendarInstance.year, calendarInstance.month - 1, 1);
             const nextMonthDate = new Date(currentDate.setMonth(currentDate.getMonth() + 1));
 
             const formattedDate = `${nextMonthDate.getFullYear()}-${String(nextMonthDate.getMonth() + 1).padStart(2, '0')}-01`;
-
-            console.log('Moving to date:', formattedDate);
 
             calendarInstance.loadData(formattedDate);
         });
