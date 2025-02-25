@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\MoneyController;
 use App\Http\Controllers\SpendingController;
-use App\Http\Controllers\SpendingController;
 use Illuminate\Support\Facades\Route;
 
 /*

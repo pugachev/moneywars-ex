@@ -128,20 +128,6 @@ class MoneyController extends Controller
         return view('money.search', compact('spendings', 'totalAmount', 'keyword'));
     }
 
-    public function search(Request $request)
-    {
-        $keyword = $request->input('keyword');
-
-        $spendings = \App\Models\Spending::where('description', 'LIKE', "%{$keyword}%")
-            ->orderBy('tgtdate', 'desc') // created_atではなくtgtdateでソート
-            ->paginate(10);
-
-        $totalAmount = \App\Models\Spending::where('description', 'LIKE', "%{$keyword}%")
-            ->sum('tgtmoney');
-
-        return view('money.search', compact('spendings', 'totalAmount', 'keyword'));
-    }
-
     public function graph()
     {
         // 過去6ヶ月分の年月を生成
