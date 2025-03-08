@@ -29,14 +29,49 @@ class MoneyController extends Controller
             ->whereMonth('tgtdate', $month)
             ->sum('tgtmoney');
 
-        \Log::info('Monthly total calculation:', [
-            'year'  => $year,
+        // 項目ごとの合計を計算
+        $itemTotals = DB::table('spendings')
+            ->select('tgtitem', DB::raw('SUM(tgtmoney) as total'))
+            ->whereYear('tgtdate', $year)
+            ->whereMonth('tgtdate', $month)
+            ->groupBy('tgtitem')
+            ->get()
+            ->pluck('total', 'tgtitem')
+            ->toArray();
+
+        \Log::info('Item totals calculation:', [
+            'year' => $year,
             'month' => $month,
-            'total' => $monthlyTotal,
-            'sql'   => DB::table('spendings')
+            'sql' => DB::table('spendings')
+                ->select('tgtitem', DB::raw('SUM(tgtmoney) as total'))
+                ->whereYear('tgtdate', $year)
+                ->whereMonth('tgtdate', $month)
+                ->groupBy('tgtitem')
+                ->toSql(),
+            'bindings' => DB::table('spendings')
+                ->select('tgtitem', DB::raw('SUM(tgtmoney) as total'))
+                ->whereYear('tgtdate', $year)
+                ->whereMonth('tgtdate', $month)
+                ->groupBy('tgtitem')
+                ->getBindings(),
+            'itemTotals' => $itemTotals,
+            'raw_data' => DB::table('spendings')
+                ->select('tgtitem', 'tgtmoney', 'tgtdate')
+                ->whereYear('tgtdate', $year)
+                ->whereMonth('tgtdate', $month)
+                ->get()
+        ]);
+
+        \Log::info('Monthly total calculation:', [
+            'year'     => $year,
+            'month'    => $month,
+            'total'    => $monthlyTotal,
+            'sql'      => DB::table('spendings')
                 ->whereYear('tgtdate', $year)
                 ->whereMonth('tgtdate', $month)
                 ->toSql(),
+            'monthlyTotal' => $monthlyTotal,
+            'itemTotals' => $itemTotals,
         ]);
 
         $spendings = DB::table('spendings')
@@ -64,6 +99,7 @@ class MoneyController extends Controller
             'month'        => (int) $month,
             'holiday'      => [],
             'monthlyTotal' => $monthlyTotal,
+            'itemTotals'   => $itemTotals,
         ]);
     }
 

@@ -44,7 +44,14 @@
         <div class="calendar-head">
           <div class="calendar-header-content">
             <p class="calendar-year-month"></p>
-            <p class="monthly-total">今月の合計: <span id="monthlyTotal">0</span>円</p>
+            <p class="monthly-total">今月の合計: <span id="monthlyTotal"></span>円</p>
+            <div class="item-totals">
+              <div class="item-total">食費: <span id="itemTotal1"></span>円</div>
+              <div class="item-total">日用品: <span id="itemTotal2"></span>円</div>
+              <div class="item-total">衣服: <span id="itemTotal3"></span>円</div>
+              <div class="item-total">交通費: <span id="itemTotal4"></span>円</div>
+              <div class="item-total">その他: <span id="itemTotal5"></span>円</div>
+            </div>
           </div>
         </div>
       `);
@@ -229,7 +236,8 @@
             dataType: "json",
             async: true,
             success: function(data) {
-                console.log('API Response for date ' + defaultTgtDate + ':', data);
+                console.log('API Response:', data);
+                console.log('Item totals from API:', data.itemTotals);
                 
                 // MoneyControllerから取得したデータを設定
                 self.events = data.event || [];
@@ -237,20 +245,33 @@
                 self.month = data.month;
                 self.holiday = data.holiday || [];
 
-                // 合計金額を更新（文字列の場合は数値に変換）
-                const monthlyTotal = data.monthlyTotal ? Number(data.monthlyTotal) : 
-                    // monthlyTotalがない場合は、eventsから合計を計算
-                    data.event.reduce((sum, event) => sum + Number(event.amount || 0), 0);
+                // 合計金額を更新
+                const monthlyTotal = data.monthlyTotal ? Number(data.monthlyTotal) : 0;
+                console.log('Monthly total:', monthlyTotal);
+                $('#monthlyTotal').text(monthlyTotal > 0 ? monthlyTotal.toLocaleString() : '');
 
-                console.log('Calculated monthly total:', monthlyTotal);
+                // 項目ごとの合計を更新
+                const itemTotals = data.itemTotals || {};
+                console.log('Updating item totals:', itemTotals);
                 
-                // 合計金額を表示用にフォーマット
-                $('#monthlyTotal').text(monthlyTotal.toLocaleString());
+                // 全ての項目を空にリセット
+                for (let i = 1; i <= 5; i++) {
+                    $(`#itemTotal${i}`).text('');
+                }
                 
+                // データがある項目のみ更新
+                Object.entries(itemTotals).forEach(([itemId, total]) => {
+                    const value = Number(total);
+                    console.log(`Setting item ${itemId} total to:`, value);
+                    if (value > 0) {
+                        $(`#itemTotal${itemId}`).text(value.toLocaleString());
+                    }
+                });
+
                 // カスタムイベントを発火
-                console.log('Triggering calendarDataLoaded with monthlyTotal:', monthlyTotal);
                 $(document).trigger('calendarDataLoaded', {
-                    monthlyTotal: monthlyTotal
+                    monthlyTotal: monthlyTotal,
+                    itemTotals: itemTotals
                 });
 
                 // カレンダーを再描画

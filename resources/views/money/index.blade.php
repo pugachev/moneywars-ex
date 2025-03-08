@@ -44,6 +44,47 @@
             color: #dc3545;
             margin: 0 0 10px 0;
         }
+        .item-totals {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin: 10px auto;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            width: 100%;
+            flex-wrap: nowrap;
+        }
+        .item-total {
+            font-size: 14px;
+            color: #495057;
+            padding: 8px 12px;
+            border-radius: 5px;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            white-space: nowrap;
+            flex: 1;
+            text-align: center;
+            min-width: 0;
+        }
+        .item-total span {
+            font-weight: bold;
+            color: #dc3545;
+            margin-left: 5px;
+        }
+        /* レスポンシブ対応 */
+        @media (max-width: 768px) {
+            .item-totals {
+                flex-direction: column;
+                gap: 8px;
+                padding: 15px;
+            }
+            .item-total {
+                width: 100%;
+                padding: 10px;
+            }
+        }
         /* 新規ボタンの無効化状態のスタイル */
         .nav-link.disabled {
             opacity: 0.6;
@@ -282,6 +323,13 @@
         $(document).on('calendarDataLoaded', function(e, data) {
             // monthlyTotalが0または未定義の場合も含めて必ず処理を実行
             const total = data && data.monthlyTotal ? Number(data.monthlyTotal) : 0;
+            
+            // 項目ごとの合計を更新
+            const itemTotals = data && data.itemTotals ? data.itemTotals : {};
+            for (let i = 1; i <= 5; i++) {
+                $(`#itemTotal${i}`).text(Number(itemTotals[i] || 0).toLocaleString());
+            }
+            
             if(total >= 100000){
                 navbar.classList.remove('bg-info');
                 navbar.classList.add('bg-danger');

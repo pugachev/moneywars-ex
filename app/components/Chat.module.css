@@ -1,0 +1,7 @@
+.chatContainer {
+    font-size: 18px;  /* フォントサイズを16pxに設定 */
+}
+
+.messageContent {
+    font-size: 18px;  /* メッセージ内容のフォントサイズを16px設定 */
+} 
