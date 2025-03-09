@@ -24,6 +24,22 @@
             -moz-appearance: textfield;
         }
 
+        /* モーダルのスタイル */
+        @media (min-width: 768px) {
+            #dailySpendingList .modal-dialog {
+                width: 40vw;
+                max-width: 40vw;
+            }
+        }
+
+        @media (max-width: 767px) {
+            #dailySpendingList .modal-dialog {
+                width: 95vw;
+                max-width: 95vw;
+                margin: 1.75rem auto;
+            }
+        }
+
         .calendar-head {
             text-align: center;
             margin-bottom: 20px;
