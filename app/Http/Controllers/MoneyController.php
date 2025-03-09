@@ -109,12 +109,14 @@ class MoneyController extends Controller
             'date'    => 'required|date',
             'amount'  => 'required|numeric',
             'tgtitem' => 'required|numeric|between:1,5',
+            'description' => 'nullable|string|max:255',
         ]);
 
         Spending::create([
             'tgtdate'  => $validated['date'],
             'tgtmoney' => $validated['amount'],
             'tgtitem'  => $validated['tgtitem'],
+            'description' => $validated['description'],
         ]);
 
         return redirect()->route('money.index')
