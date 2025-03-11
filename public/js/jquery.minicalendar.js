@@ -44,13 +44,14 @@
         <div class="calendar-head">
           <div class="calendar-header-content">
             <p class="calendar-year-month"></p>
-            <p class="monthly-total">今月の合計: <span id="monthlyTotal"></span>円</p>
+            <p class="monthly-total" style="color: #dc3545;">今月の合計: <span id="monthlyTotal">0</span>円</p>
             <div class="item-totals">
               <div class="item-total">食費: <span id="itemTotal1"></span>円</div>
               <div class="item-total">日用品: <span id="itemTotal2"></span>円</div>
               <div class="item-total">衣服: <span id="itemTotal3"></span>円</div>
               <div class="item-total">交通費: <span id="itemTotal4"></span>円</div>
               <div class="item-total">その他: <span id="itemTotal5"></span>円</div>
+              <div class="item-total">Amazon: <span id="amazonTotal"></span>円</div>
             </div>
           </div>
         </div>
@@ -249,6 +250,11 @@
                 const monthlyTotal = data.monthlyTotal ? Number(data.monthlyTotal) : 0;
                 console.log('Monthly total:', monthlyTotal);
                 $('#monthlyTotal').text(monthlyTotal > 0 ? monthlyTotal.toLocaleString() : '');
+
+                // Amazon支出を更新
+                const amazonTotal = data.amazonTotal ? Number(data.amazonTotal) : 0;
+                console.log('Amazon total:', amazonTotal);
+                $('#amazonTotal').text(amazonTotal > 0 ? amazonTotal.toLocaleString() : '');
 
                 // 項目ごとの合計を更新
                 const itemTotals = data.itemTotals || {};

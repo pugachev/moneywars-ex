@@ -29,6 +29,13 @@ class MoneyController extends Controller
             ->whereMonth('tgtdate', $month)
             ->sum('tgtmoney');
 
+        // Amazonの支出合計を取得
+        $amazonTotal = DB::table('spendings')
+            ->whereYear('tgtdate', $year)
+            ->whereMonth('tgtdate', $month)
+            ->where('description', 'like', '%Amazon%')
+            ->sum('tgtmoney');
+
         // 項目ごとの合計を計算
         $itemTotals = DB::table('spendings')
             ->select('tgtitem', DB::raw('SUM(tgtmoney) as total'))
@@ -100,6 +107,7 @@ class MoneyController extends Controller
             'holiday'      => [],
             'monthlyTotal' => $monthlyTotal,
             'itemTotals'   => $itemTotals,
+            'amazonTotal'  => $amazonTotal,
         ]);
     }
 

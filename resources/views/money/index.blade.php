@@ -155,6 +155,9 @@
     @endif
 
     <div id="wrap" class="mt-5 mb-5">
+        <div class="calendar-head">
+            <div class="calendar-year-month"></div>
+        </div>
         <div id="mini-calendar"></div>
     </div>
     <!-- ここに本文を記述します -->
