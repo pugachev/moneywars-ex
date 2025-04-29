@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AmazonUsageController;
 use App\Http\Controllers\MoneyController;
 use Illuminate\Support\Facades\Route;
 
@@ -25,3 +26,7 @@ Route::post('/money/store', [MoneyController::class, 'store'])->name('money.stor
 Route::get('/money/daily/{date}', [MoneyController::class, 'daily'])->name('money.daily');
 Route::delete('/money/{id}', [MoneyController::class, 'destroy'])->name('money.destroy');
 Route::put('/money/{id}', [MoneyController::class, 'update'])->name('money.update');
+Route::get('/amazon', [AmazonUsageController::class, 'index'])->name('amazon.index');
+Route::post('/amazon/toggle', [AmazonUsageController::class, 'toggle'])
+    ->withoutMiddleware(['verify_csrf_token'])
+    ->name('amazon.toggle');

@@ -24,3 +24,17 @@ php artisan key:generate
 
 git config --global user.name "pugachev"
 git config --global user.email "pugachev@gmail.com"
+
+ちょっと新しい機能追加でお手伝いください
+
+Amazon利用履歴を保存する機能
+・money/index.phpと同じカレンダー表示
+・navbarがあり「前月」「翌月」ボタンが存在しカレンダー表示を切り替えれる
+・日付をクリックすると「◯」と「☓」ボタンが交互に切り替わる
+・この状態をテーブルに保存する
+・「◯」は青色で「☓」は赤色
+・money/amazonused.phpとする
+・money/index.phpのnavbarから遷移可能
+・money/amazonused.phpのnavbarから遷移可能
+
+
