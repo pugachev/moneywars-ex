@@ -4,7 +4,7 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <div class="container">
     <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="calendar-container">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <a href="{{ route('amazon.index', ['date' => $currentDate->copy()->subMonth()->format('Y-m-d')]) }}" class="btn btn-primary">前月</a>
@@ -44,16 +44,16 @@
                                                     $status = $usageHistory[$dateStr]->is_used ? 'ok' : 'ng';
                                                 }
                                             @endphp
-                                            <td class="text-center p-0" style="height: 50px; position: relative;">
+                                            <td class="text-center p-0" style="height: 120px; position: relative;">
                                                 @if ($isCurrentMonth)
                                                     <button class="btn date-btn w-100 h-100 border-0"
                                                             data-date="{{ $dateStr }}"
                                                             data-status="{{ $status }}">
                                                         <div class="position-relative w-100 h-100">
-                                                            <span class="position-absolute" style="top: 5px; left: 5px;">
+                                                            <span class="position-absolute {{ $i === 0 ? 'text-danger' : ($i === 6 ? 'text-primary' : '') }}" style="top: 5px; left: 5px;">
                                                                 {{ $startDay->format('j') }}
                                                             </span>
-                                                            <span class="usage-mark position-absolute" style="top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 20px;">
+                                                            <span class="usage-mark position-absolute" style="top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 60px;">
                                                                 @if ($status === 'ok')
                                                                     ○
                                                                 @elseif ($status === 'ng')
@@ -63,7 +63,7 @@
                                                         </div>
                                                     </button>
                                                 @else
-                                                    <span class="text-muted">{{ $startDay->format('j') }}</span>
+                                                    <span class="text-muted {{ $i === 0 ? 'text-danger' : ($i === 6 ? 'text-primary' : '') }}">{{ $startDay->format('j') }}</span>
                                                 @endif
                                             </td>
                                             @php
@@ -82,6 +82,11 @@
 </div>
 
 <style>
+.calendar-container {
+    width: 90%;
+    margin: 0 auto;
+}
+
 .date-btn {
     background-color: white !important;
     padding: 0 !important;
@@ -91,8 +96,21 @@
     background-color: #f8f9fa !important;
 }
 
+.calendar th {
+    font-size: 24px;  /* 曜日のフォントサイズを拡大 */
+}
+
+.calendar td {
+    height: 120px !important;  /* セルの高さを調整 */
+}
+
+.calendar .position-absolute {
+    font-size: 24px;  /* 日付のフォントサイズを拡大 */
+}
+
 .usage-mark {
     opacity: 0.7;
+    font-size: 60px !important;  /* ○×マークのフォントサイズを拡大 */
 }
 
 .date-btn[data-status="ok"] .usage-mark {
