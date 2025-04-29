@@ -41,10 +41,128 @@
      */
     createFrame : function() {
       this.ele.append(`
+        <style>
+          @media (max-width: 768px) {
+            .item-totals {
+              grid-template-columns: 1fr !important;
+              gap: 8px !important;
+            }
+            .total-item {
+              padding: 15px !important;
+            }
+            .total-item > div:first-child {
+              font-size: 1em !important;
+            }
+            .total-item > div:last-child {
+              font-size: 1.2em !important;
+              margin-top: 5px !important;
+            }
+            .calendar-year-month {
+              font-size: 20px !important;
+            }
+            .monthly-total {
+              font-size: 18px !important;
+            }
+          }
+        </style>
         <div class="calendar-head">
           <div class="calendar-header-content">
-            <p class="calendar-year-month"></p>
-            <p class="monthly-total">今月の合計: <span id="monthlyTotal">0</span>円</p>
+            <p class="calendar-year-month" style="text-align: center; font-size: 24px; margin-bottom: 10px;"></p>
+            <p class="monthly-total" style="text-align: center; font-size: 20px; margin-bottom: 20px; color: #e74c3c;">今月の合計: <span id="monthlyTotal">0</span>円</p>
+            <div class="totals-container" style="
+              background: #f8f9fa;
+              border-radius: 8px;
+              padding: 15px;
+              margin: 0 auto 20px;
+              width: 100%;
+              box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+            ">
+              <div class="item-totals" style="
+                display: grid;
+                grid-template-columns: repeat(6, 1fr);
+                gap: 10px;
+                width: 100%;
+              ">
+                <div class="total-item" style="
+                  background: white;
+                  padding: 10px 5px;
+                  border-radius: 6px;
+                  text-align: center;
+                  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+                  display: flex;
+                  flex-direction: column;
+                  justify-content: center;
+                ">
+                  <div style="color: #2c3e50; font-size: 0.9em;">食費</div>
+                  <div><span id="itemTotal1" style="font-weight: bold;">0</span>円</div>
+                </div>
+                <div class="total-item" style="
+                  background: white;
+                  padding: 10px 5px;
+                  border-radius: 6px;
+                  text-align: center;
+                  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+                  display: flex;
+                  flex-direction: column;
+                  justify-content: center;
+                ">
+                  <div style="color: #2c3e50; font-size: 0.9em;">日用品</div>
+                  <div><span id="itemTotal2" style="font-weight: bold;">0</span>円</div>
+                </div>
+                <div class="total-item" style="
+                  background: white;
+                  padding: 10px 5px;
+                  border-radius: 6px;
+                  text-align: center;
+                  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+                  display: flex;
+                  flex-direction: column;
+                  justify-content: center;
+                ">
+                  <div style="color: #2c3e50; font-size: 0.9em;">衣服</div>
+                  <div><span id="itemTotal3" style="font-weight: bold;">0</span>円</div>
+                </div>
+                <div class="total-item" style="
+                  background: white;
+                  padding: 10px 5px;
+                  border-radius: 6px;
+                  text-align: center;
+                  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+                  display: flex;
+                  flex-direction: column;
+                  justify-content: center;
+                ">
+                  <div style="color: #2c3e50; font-size: 0.9em;">交通費</div>
+                  <div><span id="itemTotal4" style="font-weight: bold;">0</span>円</div>
+                </div>
+                <div class="total-item" style="
+                  background: white;
+                  padding: 10px 5px;
+                  border-radius: 6px;
+                  text-align: center;
+                  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+                  display: flex;
+                  flex-direction: column;
+                  justify-content: center;
+                ">
+                  <div style="color: #2c3e50; font-size: 0.9em;">その他</div>
+                  <div><span id="itemTotal5" style="font-weight: bold;">0</span>円</div>
+                </div>
+                <div class="total-item" style="
+                  background: white;
+                  padding: 10px 5px;
+                  border-radius: 6px;
+                  text-align: center;
+                  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+                  display: flex;
+                  flex-direction: column;
+                  justify-content: center;
+                ">
+                  <div style="color: #2c3e50; font-size: 0.9em;">Amazon</div>
+                  <div><span id="amazonTotal" style="font-weight: bold;">0</span>円</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       `);
@@ -97,11 +215,11 @@
      */
     printType : function(thisYear, thisMonth, skipDataLoad = false) {
         console.log('Printing calendar for:', thisYear, thisMonth);
-        
+
         // 年月を表示
         let tgtyearmonth = thisYear + '年' + thisMonth+ '月';
         $(this.ele).find('.calendar-year-month').text(tgtyearmonth);
-        
+
         // 対象月の日付を生成
         var thisDate = new Date(thisYear, thisMonth-1, 1);
 
@@ -110,16 +228,6 @@
             const targetDate = `${thisYear}-${thisMonth.toString().padStart(2, '0')}-01`;
             this.loadData(targetDate);
             return; // データロード後に再度呼ばれるので、ここで終了
-        }
-
-        // 月間合計を表示（既存の値を保持）
-        const currentTotal = $('#monthlyTotal').text();
-        console.log('Current monthly total:', currentTotal);
-        if (currentTotal === '0') {
-            // APIから取得した合計があれば使用
-            const apiTotal = this.events.reduce((sum, event) => sum + Number(event.amount || 0), 0);
-            console.log('Calculated API total:', apiTotal);
-            $('#monthlyTotal').text(apiTotal.toLocaleString());
         }
 
         // 開始の曜日
@@ -229,44 +337,54 @@
             dataType: "json",
             async: true,
             success: function(data) {
-                console.log('API Response for date ' + defaultTgtDate + ':', data);
-                
-                // MoneyControllerから取得したデータを設定
+                console.log('API Response:', data);
+
+                // データを設定
                 self.events = data.event || [];
                 self.year = data.year;
                 self.month = data.month;
                 self.holiday = data.holiday || [];
 
-                // 合計金額を更新（文字列の場合は数値に変換）
-                const monthlyTotal = data.monthlyTotal ? Number(data.monthlyTotal) : 
-                    // monthlyTotalがない場合は、eventsから合計を計算
-                    data.event.reduce((sum, event) => sum + Number(event.amount || 0), 0);
-
-                console.log('Calculated monthly total:', monthlyTotal);
-                
-                // 合計金額を表示用にフォーマット
+                // 合計金額を更新
+                const monthlyTotal = data.monthlyTotal || 0;
                 $('#monthlyTotal').text(monthlyTotal.toLocaleString());
-                
-                // カスタムイベントを発火
-                console.log('Triggering calendarDataLoaded with monthlyTotal:', monthlyTotal);
-                $(document).trigger('calendarDataLoaded', {
-                    monthlyTotal: monthlyTotal
-                });
+
+                // 項目別合計を更新
+                if (data.itemTotals) {
+                    Object.keys(data.itemTotals).forEach(key => {
+                        const total = data.itemTotals[key] || 0;
+                        $(`#itemTotal${key}`).text(total.toLocaleString());
+                    });
+                }
+
+                // Amazon合計を更新
+                const amazonTotal = data.amazonTotal || 0;
+                $('#amazonTotal').text(amazonTotal.toLocaleString());
 
                 // カレンダーを再描画
                 self.printType(self.year, self.month, true);
                 self.setEvent();
+
+                // デバッグ情報
+                console.log('Updated totals:', {
+                    monthly: monthlyTotal,
+                    items: data.itemTotals,
+                    amazon: data.amazonTotal
+                });
             },
             error: function(jqXHR, textStatus, errorThrown) {
-                console.error("MoneyControllerからのデータ取得に失敗:", textStatus);
-                console.error("エラー詳細:", errorThrown);
-                console.error("Response:", jqXHR.responseText);
-                
-                // エラー時は合計を0にリセット
-                $('#monthlyTotal').text('0');
-                $(document).trigger('calendarDataLoaded', {
-                    monthlyTotal: 0
+                console.error("データ取得エラー:", {
+                    status: textStatus,
+                    error: errorThrown,
+                    response: jqXHR.responseText
                 });
+
+                // エラー時は合計をクリア
+                $('#monthlyTotal').text('0');
+                for (let i = 1; i <= 5; i++) {
+                    $(`#itemTotal${i}`).text('0');
+                }
+                $('#amazonTotal').text('0');
             }
         });
     }

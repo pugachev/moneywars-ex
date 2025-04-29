@@ -24,28 +24,29 @@
             -moz-appearance: textfield;
         }
 
-        .calendar-head {
+        /* money-calendar specific styles */
+        .money-calendar .calendar-head {
             text-align: center;
             margin-bottom: 20px;
         }
-        .calendar-header-content {
+        .money-calendar .calendar-header-content {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 5px;
         }
-        .calendar-year-month {
+        .money-calendar .calendar-year-month {
             font-size: 24px;
             font-weight: bold;
             margin: 0;
         }
-        .monthly-total {
+        .money-calendar .monthly-total {
             font-size: 16px;
             color: #dc3545;
             margin: 0 0 10px 0;
         }
         /* 新規ボタンの無効化状態のスタイル */
-        .nav-link.disabled {
+        .money-calendar .nav-link.disabled {
             opacity: 0.6;
             pointer-events: none;
         }
@@ -82,7 +83,7 @@
     <div id="alert" class="alert alert-success">{{session('message')}}</div>
     @endif
 
-    <div id="wrap" class="mt-5 mb-5">
+    <div id="wrap" class="mt-5 mb-5 money-calendar">
         <div id="mini-calendar"></div>
     </div>
     <!-- ここに本文を記述します -->

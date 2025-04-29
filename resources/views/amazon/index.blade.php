@@ -113,6 +113,9 @@ const STATUS = {
     NONE: 'none'
 };
 
+// APIのベースURL
+const BASE_URL = '{{ url("/") }}';
+
 // 状態に応じたマークの設定
 const STATUS_MARKS = {
     [STATUS.OK]: { text: '○', color: '#28a745' },
@@ -146,7 +149,7 @@ document.querySelectorAll('.date-btn').forEach(button => {
         try {
             button.disabled = true; // 二重クリック防止
 
-            const response = await fetch('/amazon/toggle', {
+            const response = await fetch(`${BASE_URL}/amazon/toggle`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
