@@ -40,6 +40,7 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h3 class="mb-0">{{ $currentDate->format('Y年n月') }}</h3>
+                    <h4 class="mb-0 text-danger">Amazon合計: {{ number_format($amazonTotal) }}円</h4>
                 </div>
 
                 <div class="card-body">

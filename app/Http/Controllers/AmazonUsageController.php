@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AmazonUsageHistory;
+use App\Models\Spending;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -25,7 +26,12 @@ class AmazonUsageController extends Controller
                 return $item->date;
             });
 
-        return view('amazon.index', compact('currentDate', 'usageHistory'));
+        // Amazon支出の合計を計算
+        $amazonTotal = Spending::whereBetween('tgtdate', [$startOfMonth, $endOfMonth])
+            ->where('description', 'like', '%amazon%')
+            ->sum('tgtmoney');
+
+        return view('amazon.index', compact('currentDate', 'usageHistory', 'amazonTotal'));
     }
 
     public function toggle(Request $request)
